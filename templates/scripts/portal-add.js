@@ -8,7 +8,6 @@ const { promisify } = require('util');
 
 const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
-const mkdir = promisify(fs.mkdir);
 const exists = promisify(fs.exists);
 
 // Colors for console output
