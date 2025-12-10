@@ -1,3 +1,12 @@
+## [1.0.6](https://github.com/samsmithKruz/z1lms-edutech/compare/v1.0.5...v1.0.6) (2025-12-10)
+
+
+### Bug Fixes
+
+* update registry URL in edutech configuration ([50bbc86](https://github.com/samsmithKruz/z1lms-edutech/commit/50bbc86d397b4063f985e5092bdc6a92c38fcd61))
+
+
+
 ## [1.0.5](https://github.com/samsmithKruz/z1lms-edutech/compare/v1.0.4...v1.0.5) (2025-12-10)
 
 
