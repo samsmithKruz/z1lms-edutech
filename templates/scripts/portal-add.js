@@ -101,7 +101,7 @@ async function addPortal(portalName, theme = 'default') {
   const portalPath = `portals/${portalName}`;
   if (await exists(portalPath)) {
     logError(`Portal "${portalName}" already exists at ${portalPath}`);
-    logInfo('Use: pnpm run portal:update to update existing portal');
+    logInfo('Use: npm run portal:update to update existing portal');
     process.exit(1);
   }
   
@@ -290,10 +290,10 @@ async function addPortal(portalName, theme = 'default') {
   // 10. Install dependencies
   logInfo('Installing dependencies...');
   try {
-    execSync('pnpm install', { stdio: 'inherit' });
+    execSync('npm install', { stdio: 'inherit' });
     logSuccess('Dependencies installed');
   } catch (error) {
-    logWarning('Dependency installation had issues. You may need to run: pnpm install');
+    logWarning('Dependency installation had issues. You may need to run: npm install');
   }
   
   // 11. Final success message
@@ -322,12 +322,12 @@ async function addPortal(portalName, theme = 'default') {
   }
   
   console.log(`\n${colors.cyan}🚀 To start development:${colors.reset}`);
-  console.log(`  ${colors.green}pnpm run dev${colors.reset}          # Start all portals`);
+  console.log(`  ${colors.green}npm run dev${colors.reset}          # Start all portals`);
   console.log(`  ${colors.green}cd portals/${portalName} && npm run dev${colors.reset}  # Start this portal only`);
   
   console.log(`\n${colors.cyan}🏗️  To build for production:${colors.reset}`);
-  console.log(`  ${colors.green}pnpm run build${colors.reset}        # Build all portals`);
-  console.log(`  ${colors.green}pnpm run build:portal ./portals/${portalName}${colors.reset}  # Build this portal`);
+  console.log(`  ${colors.green}npm run build${colors.reset}        # Build all portals`);
+  console.log(`  ${colors.green}npm run build:portal ./portals/${portalName}${colors.reset}  # Build this portal`);
   
   console.log(`\n${colors.yellow}📝 Note:${colors.reset} Portal configuration saved to portals/${portalName}/.portal-config.json`);
 }
@@ -365,16 +365,16 @@ function parseArgs() {
 function showHelp() {
   console.log(`
 ${colors.cyan}Usage:${colors.reset}
-  pnpm run portal:add <portal-name> [options]
+  npm run portal:add <portal-name> [options]
 
 ${colors.cyan}Options:${colors.reset}
   --theme, -t <theme>    Theme to use (default: "default")
   --help, -h             Show this help message
 
 ${colors.cyan}Examples:${colors.reset}
-  pnpm run portal:add cbt
-  pnpm run portal:add cbt --theme silk
-  pnpm run portal:add academic --theme modern
+  npm run portal:add cbt
+  npm run portal:add cbt --theme silk
+  npm run portal:add academic --theme modern
 
 ${colors.cyan}Notes:${colors.reset}
   • Portal will be added to ./portals/<portal-name>/

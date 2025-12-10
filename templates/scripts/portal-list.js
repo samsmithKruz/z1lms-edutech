@@ -238,7 +238,7 @@ async function listAvailablePortals(registry) {
   );
   
   console.log(`${dim}Total:${colors.reset} ${Object.keys(registry.portals).length} portal(s) available`);
-  console.log(`${dim}Use:${colors.reset} ${colors.green}pnpm run portal:add <name> [--theme <theme>]${colors.reset} to install`);
+  console.log(`${dim}Use:${colors.reset} ${colors.green}npm run portal:add <name> [--theme <theme>]${colors.reset} to install`);
 }
 
 async function listInstalledPortals() {
@@ -246,7 +246,7 @@ async function listInstalledPortals() {
   
   if (portals.length === 0) {
     console.log(`\n${colors.yellow}No portals installed yet${colors.reset}`);
-    console.log(`${dim}Use ${colors.green}pnpm run portal:list --available${colors.reset} to see available portals`);
+    console.log(`${dim}Use ${colors.green}npm run portal:list --available${colors.reset} to see available portals`);
     return;
   }
   
@@ -268,8 +268,8 @@ async function listInstalledPortals() {
   );
   
   console.log(`${dim}Total:${colors.reset} ${portals.length} portal(s) installed`);
-  console.log(`${dim}Manage:${colors.reset} ${colors.green}pnpm run portal:update <name>${colors.reset} to update`);
-  console.log(`${dim}        ${colors.green}pnpm run portal:remove <name>${colors.reset} to remove`);
+  console.log(`${dim}Manage:${colors.reset} ${colors.green}npm run portal:update <name>${colors.reset} to update`);
+  console.log(`${dim}        ${colors.green}npm run portal:remove <name>${colors.reset} to remove`);
 }
 
 async function listAll() {
@@ -296,10 +296,10 @@ async function listAll() {
   }
   
   console.log(`\n${dim}Commands:${colors.reset}`);
-  console.log(`  ${colors.green}pnpm run portal:list --installed${colors.reset}  Show installed portals`);
-  console.log(`  ${colors.green}pnpm run portal:list --available${colors.reset}  Show available portals`);
-  console.log(`  ${colors.green}pnpm run portal:list --refresh${colors.reset}    Refresh registry cache`);
-  console.log(`  ${colors.green}pnpm run portal:add <name>${colors.reset}        Install a portal`);
+  console.log(`  ${colors.green}npm run portal:list --installed${colors.reset}  Show installed portals`);
+  console.log(`  ${colors.green}npm run portal:list --available${colors.reset}  Show available portals`);
+  console.log(`  ${colors.green}npm run portal:list --refresh${colors.reset}    Refresh registry cache`);
+  console.log(`  ${colors.green}npm run portal:add <name>${colors.reset}        Install a portal`);
 }
 
 function printPortalInfo(portal, isDetailed = false) {
@@ -357,7 +357,7 @@ async function showPortalDetails(portalName) {
         console.log(`  ${colors.white}Description:${colors.reset} ${availablePortal.description}`);
         console.log(`  ${colors.white}Themes:${colors.reset} ${Object.keys(availablePortal.themes || {}).join(', ')}`);
         console.log(`  ${colors.white}Version:${colors.reset} ${availablePortal.version || '1.0.0'}`);
-        console.log(`\n${colors.green}Install with:${colors.reset} pnpm run portal:add ${portalName}`);
+        console.log(`\n${colors.green}Install with:${colors.reset} npm run portal:add ${portalName}`);
       }
     } catch (error) {
       // Ignore registry errors
@@ -410,7 +410,7 @@ function parseArgs() {
 function showHelp() {
   console.log(`
 ${bold}${colors.blue}Usage:${colors.reset}
-  pnpm run portal:list [options]
+  npm run portal:list [options]
 
 ${bold}${colors.blue}Options:${colors.reset}
   --installed, -i        List only installed portals
@@ -420,12 +420,12 @@ ${bold}${colors.blue}Options:${colors.reset}
   --help, -h             Show this help message
 
 ${bold}${colors.blue}Examples:${colors.reset}
-  pnpm run portal:list                 # Show all portals
-  pnpm run portal:list --installed     # Show installed portals only
-  pnpm run portal:list --available     # Show available portals only
-  pnpm run portal:list --refresh       # Refresh and show all
-  pnpm run portal:list --details cbt   # Show details about CBT portal
-  pnpm run portal:list -d academic     # Show details about Academic portal
+  npm run portal:list                 # Show all portals
+  npm run portal:list --installed     # Show installed portals only
+  npm run portal:list --available     # Show available portals only
+  npm run portal:list --refresh       # Refresh and show all
+  npm run portal:list --details cbt   # Show details about CBT portal
+  npm run portal:list -d academic     # Show details about Academic portal
 
 ${bold}${colors.blue}Notes:${colors.reset}
   • Registry is cached for 1 hour

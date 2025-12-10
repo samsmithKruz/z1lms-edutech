@@ -100,7 +100,7 @@ ${colors.blue}To see changes:${colors.reset}
   cd portals/${portalName} && git status
   
 ${colors.blue}To force update (will overwrite changes):${colors.reset}
-  pnpm run portal:update ${portalName} --force
+  npm run portal:update ${portalName} --force
 `);
       process.exit(1);
     }
@@ -197,10 +197,10 @@ ${colors.blue}To force update (will overwrite changes):${colors.reset}
           JSON.stringify(oldPkg.devDependencies) !== JSON.stringify(newPkg.devDependencies)) {
         logInfo('Dependencies changed, installing updates...');
         try {
-          execSync('pnpm install', { stdio: 'inherit' });
+          execSync('npm install', { stdio: 'inherit' });
           logSuccess('Dependencies updated');
         } catch (error) {
-          logWarning('Failed to install dependencies. You may need to run: pnpm install');
+          logWarning('Failed to install dependencies. You may need to run: npm install');
         }
       }
     }
@@ -215,7 +215,7 @@ ${colors.blue}To force update (will overwrite changes):${colors.reset}
     
     console.log(`\n${colors.yellow}⚠️  Important:${colors.reset}`);
     console.log(`  1. Review the changes in your portal`);
-    console.log(`  2. Test the updated portal: pnpm run dev`);
+    console.log(`  2. Test the updated portal: npm run dev`);
     console.log(`  3. Backup will be kept for rollback if needed`);
     
     console.log(`\n${colors.blue}🔧 Next steps:${colors.reset}`);
@@ -300,16 +300,16 @@ function parseArgs() {
 function showHelp() {
   console.log(`
 ${colors.blue}Usage:${colors.reset}
-  pnpm run portal:update <portal-name> [options]
+  npm run portal:update <portal-name> [options]
 
 ${colors.blue}Options:${colors.reset}
   --force, -f           Force update (overwrites local changes)
   --help, -h            Show this help message
 
 ${colors.blue}Examples:${colors.reset}
-  pnpm run portal:update cbt
-  pnpm run portal:update academic --force
-  pnpm run portal:update finance
+  npm run portal:update cbt
+  npm run portal:update academic --force
+  npm run portal:update finance
 
 ${colors.blue}Notes:${colors.reset}
   • Creates a backup before updating

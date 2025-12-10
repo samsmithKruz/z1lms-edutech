@@ -6,16 +6,16 @@ This is a monorepo workspace for managing multiple edutech portals using Z1LMS p
 
 ### Prerequisites
 - Node.js 18+ 
-- pnpm 8+
+- npm 8+
 - Git
 
 ### Installation
 ```bash
 # Install dependencies
-pnpm install
+npm install
 
 # Add your first portal
-pnpm run portal:add academic
+npm run portal:add academic
 
 # Start development
-pnpm run dev
+npm run dev

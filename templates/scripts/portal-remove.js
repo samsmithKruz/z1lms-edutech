@@ -342,7 +342,7 @@ async function removePortal(portalName, force = false, backup = true) {
   }
   
   console.log(`${colors.blue}🔧 Next steps:${colors.reset}`);
-  console.log(`  ${colors.green}pnpm install${colors.reset}           # Update workspace dependencies`);
+  console.log(`  ${colors.green}npm install${colors.reset}           # Update workspace dependencies`);
   
   if (hasUncommittedChanges && !backupDir) {
     console.log(`\n${colors.red}⚠️  WARNING: Uncommitted changes were lost!${colors.reset}`);
@@ -473,9 +473,9 @@ function parseArgs() {
 function showHelp() {
   console.log(`
 ${colors.blue}Usage:${colors.reset}
-  pnpm run portal:remove <portal-name> [options]
-  pnpm run portal:remove --interactive
-  pnpm run portal:remove --list
+  npm run portal:remove <portal-name> [options]
+  npm run portal:remove --interactive
+  npm run portal:remove --list
 
 ${colors.blue}Options:${colors.reset}
   --force, -f           Force removal without confirmation
@@ -485,11 +485,11 @@ ${colors.blue}Options:${colors.reset}
   --help, -h            Show this help message
 
 ${colors.blue}Examples:${colors.reset}
-  pnpm run portal:remove cbt
-  pnpm run portal:remove academic --no-backup
-  pnpm run portal:remove finance --force
-  pnpm run portal:remove --interactive
-  pnpm run portal:remove --list
+  npm run portal:remove cbt
+  npm run portal:remove academic --no-backup
+  npm run portal:remove finance --force
+  npm run portal:remove --interactive
+  npm run portal:remove --list
 
 ${colors.blue}Notes:${colors.reset}
   • Creates backup by default in portal-backups/
@@ -534,7 +534,7 @@ async function main() {
       await removePortal(args.portalName, args.force, args.backup);
       
       // Suggest to run install
-      console.log(`\n${colors.yellow}💡 Tip:${colors.reset} Run ${colors.green}pnpm install${colors.reset} to clean up dependencies`);
+      console.log(`\n${colors.yellow}💡 Tip:${colors.reset} Run ${colors.green}npm install${colors.reset} to clean up dependencies`);
     }
     
   } catch (error) {

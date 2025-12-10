@@ -46,8 +46,8 @@ async function createWorkspace(institution, firstPortal) {
     console.log('📦 Initializing git repository...');
     execSync('git init', { stdio: 'pipe' });
     
-    // 3. Initialize pnpm workspace
-    console.log('📦 Setting up pnpm workspace...');
+    // 3. Initialize npm workspace
+    console.log('📦 Setting up npm workspace...');
     
     const packageJson = {
       name: workspaceName,
@@ -119,32 +119,32 @@ This workspace contains the edutech portals for ${institution}.
 
 ### Add a new portal
 \`\`\`bash
-pnpm run portal:add <portal-name> [--theme <theme-name>]
+npm run portal:add <portal-name> [--theme <theme-name>]
 \`\`\`
 
 ### Update a portal
 \`\`\`bash
-pnpm run portal:update <portal-name>
+npm run portal:update <portal-name>
 \`\`\`
 
 ### List available portals
 \`\`\`bash
-pnpm run portal:list
+npm run portal:list
 \`\`\`
 
 ## Development
 \`\`\`bash
 # Install dependencies
-pnpm install
+npm install
 
 # Start all portals in development mode
-pnpm run dev
+npm run dev
 
 # Build all portals for production
-pnpm run build
+npm run build
 
 # Build specific portal
-pnpm run build:portal ./portals/<portal-name>
+npm run build:portal ./portals/<portal-name>
 \`\`\`
 
 ## Portals Structure
@@ -193,7 +193,7 @@ pnpm run build:portal ./portals/<portal-name>
     
     // 10. Install turbo
     console.log('📦 Installing Turbo...');
-    execSync('pnpm add turbo --silent', { stdio: 'pipe' });
+    execSync('npm install turbo --save-dev --silent', { stdio: 'pipe' });
     
     // 11. Create .gitignore
     const gitignoreContent = `# Dependencies
@@ -243,7 +243,7 @@ temp-*/`;
       } catch (error) {
         console.log('\n⚠️  Initial portal setup skipped due to error');
         console.log('You can add it manually later with:');
-        console.log(`pnpm run portal:add ${firstPortal}`);
+        console.log(`npm run portal:add ${firstPortal}`);
       }
     }
     
@@ -259,17 +259,17 @@ temp-*/`;
     console.log(`  cd ${workspaceName}`);
     
     if (!firstPortal) {
-      console.log('  pnpm run portal:list          # View available portals');
-      console.log('  pnpm run portal:add <portal>  # Add your first portal');
+      console.log('  npm run portal:list          # View available portals');
+      console.log('  npm run portal:add <portal>  # Add your first portal');
     }
     
-    console.log('  pnpm run dev                # Start development servers');
-    console.log('  pnpm run build              # Build for production');
+    console.log('  npm run dev                # Start development servers');
+    console.log('  npm run build              # Build for production');
     
     console.log('\n🔧 Manage portals:');
-    console.log('  pnpm run portal:add <name> [--theme <theme>]');
-    console.log('  pnpm run portal:update <name>');
-    console.log('  pnpm run portal:remove <name>');
+    console.log('  npm run portal:add <name> [--theme <theme>]');
+    console.log('  npm run portal:update <name>');
+    console.log('  npm run portal:remove <name>');
     
     console.log('\n📚 Documentation:');
     console.log('  Check README.md for detailed instructions');
