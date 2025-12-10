@@ -1,0 +1,72 @@
+{
+  "name": "@z1lms/create-edutech",
+  "version": "1.0.0",
+  "description": "CLI tool to create and manage Edutech monorepo workspaces",
+  "keywords": [
+    "edutech",
+    "monorepo",
+    "cli",
+    "nextjs",
+    "turbo",
+    "z1lms",
+    "workspace",
+    "portal",
+    "education",
+    "lms"
+  ],
+  "homepage": "https://github.com/samsmithKruz/z1lms-edutech#readme",
+  "bugs": {
+    "url": "https://github.com/samsmithKruz/z1lms-edutech/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/samsmithKruz/z1lms-edutech.git"
+  },
+  "license": "MIT",
+  "author": "Samuel Benny <samspike46@gmail.com>",
+  "main": "index.js",
+  "bin": {
+    "create-edutech": "./bin/create-edutech.js"
+  },
+  "files": [
+    "bin/",
+    "templates/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "test": "echo \"No tests yet\" && exit 0",
+    "lint": "eslint . --ext .js",
+    "format": "prettier --write .",
+    "prepare": "npm run lint",
+    "prepublishOnly": "npm test && npm run lint",
+    "version": "conventional-changelog -p angular -i CHANGELOG.md -s && git add CHANGELOG.md"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^9.4.1",
+    "degit": "^2.8.4",
+    "inquirer": "^8.2.6"
+  },
+  "devDependencies": {
+    "eslint": "^8.33.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-node": "^11.1.0",
+    "prettier": "^2.8.3",
+    "conventional-changelog-cli": "^2.2.2"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=7.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ]
+}

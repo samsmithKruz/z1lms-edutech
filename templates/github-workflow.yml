@@ -1,0 +1,238 @@
+name: CI/CD - Smart Portal Deployment
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      shared-changed: ${{ steps.changes.outputs.shared }}
+      shared-ts-changed: ${{ steps.changes.outputs.shared_ts }}
+      shared-tsx-changed: ${{ steps.changes.outputs.shared_tsx }}
+      changed-portals-list: ${{ steps.portals_list.outputs.changed-portals-list }}
+      ecosystem-data: ${{ steps.extract-ecosystem.outputs.ecosystem_data }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Extract ecosystem.config.js data
+        id: extract-ecosystem
+        run: |
+          # Parse ecosystem.config.js to get portal names and paths
+          if [ -f "ecosystem.config.js" ]; then
+            # Use node to parse the ecosystem file and output as JSON
+            ECOSYSTEM_JSON=$(node -e "
+              const fs = require('fs');
+              const content = fs.readFileSync('ecosystem.config.js', 'utf8');
+              // Extract the apps array using regex
+              const match = content.match(/export const apps = (\[.*?\]);/s);
+              if (match) {
+                const apps = eval(match[1]);
+                console.log(JSON.stringify(apps));
+              }
+            ")
+            echo "ecosystem-data=$ECOSYSTEM_JSON" >> $GITHUB_OUTPUT
+          else
+            echo "ecosystem-data=[]" >> $GITHUB_OUTPUT
+          fi
+      
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            shared:
+              - 'shared/**'
+            shared_ts:
+              - 'shared/**/*.ts'
+            shared_tsx:
+              - 'shared/**/*.tsx'
+            academic:
+              - 'portals/academic/**'
+            admission:
+              - 'portals/admission/**'
+            apply:
+              - 'portals/apply/**'
+            apply2:
+              - 'portals/apply2/**'
+            finance:
+              - 'portals/finance/**'
+            lecturer:
+              - 'portals/lecturer/**'
+            login:
+              - 'portals/login/**'
+            notes:
+              - 'portals/notes/**'
+            onboarding-existing-students:
+              - 'portals/onboarding-existing-students/**'
+            payment:
+              - 'portals/payment/**'
+            student:
+              - 'portals/student/**'
+            superadmin:
+              - 'portals/superadmin/**'
+
+      - name: Create portals list
+        id: portals_list
+        run: |
+          changed_portals=()
+          
+          # Check each portal individually using the outputs from paths-filter
+          if [[ "${{ steps.changes.outputs.academic }}" == "true" ]]; then changed_portals+=("academic"); fi
+          if [[ "${{ steps.changes.outputs.admission }}" == "true" ]]; then changed_portals+=("admission"); fi
+          if [[ "${{ steps.changes.outputs.apply }}" == "true" ]]; then changed_portals+=("apply"); fi
+          if [[ "${{ steps.changes.outputs.apply2 }}" == "true" ]]; then changed_portals+=("apply2"); fi
+          if [[ "${{ steps.changes.outputs.finance }}" == "true" ]]; then changed_portals+=("finance"); fi
+          if [[ "${{ steps.changes.outputs.lecturer }}" == "true" ]]; then changed_portals+=("lecturer"); fi
+          if [[ "${{ steps.changes.outputs.login }}" == "true" ]]; then changed_portals+=("login"); fi
+          if [[ "${{ steps.changes.outputs.notes }}" == "true" ]]; then changed_portals+=("notes"); fi
+          if [[ "${{ steps.changes.outputs.onboarding-existing-students }}" == "true" ]]; then changed_portals+=("onboarding-existing-students"); fi
+          if [[ "${{ steps.changes.outputs.payment }}" == "true" ]]; then changed_portals+=("payment"); fi
+          if [[ "${{ steps.changes.outputs.student }}" == "true" ]]; then changed_portals+=("student"); fi
+          if [[ "${{ steps.changes.outputs.superadmin }}" == "true" ]]; then changed_portals+=("superadmin"); fi
+          
+          # Convert array to JSON string - MANUAL APPROACH (NO JQ)
+          if [ ${#changed_portals[@]} -gt 0 ]; then
+            # Create JSON array manually to avoid formatting issues
+            portals_json="["
+            for i in "${!changed_portals[@]}"; do
+              if [ $i -gt 0 ]; then
+                portals_json+=","
+              fi
+              portals_json+="\"${changed_portals[$i]}\""
+            done
+            portals_json+="]"
+          else
+            portals_json="[]"
+          fi
+          
+          echo "changed-portals-list=$portals_json" >> $GITHUB_OUTPUT
+          echo "Changed portals: ${changed_portals[*]}"
+          echo "JSON output: $portals_json"
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.shared-changed == 'true' || needs.detect-changes.outputs.changed-portals-list != '[]'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install SSHpass for password authentication
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sshpass
+
+      - name: Deploy and Build on Server
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+          SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
+          PROJECT_DIR: ${{ secrets.PROJECT_DIR }}
+        run: |
+          # Create .ssh directory if it doesn't exist
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          # Add server to known hosts
+          ssh-keyscan -H $SERVER_HOST >> ~/.ssh/known_hosts
+
+          # Parse the changed portals list and ecosystem data
+          CHANGED_PORTALS=$(echo '${{ needs.detect-changes.outputs.changed-portals-list }}' | tr -d '[]"' | tr ',' '\n' | sed 's/^ *//;s/ *$//')
+          ECOSYSTEM_DATA='${{ needs.detect-changes.outputs.ecosystem-data }}'
+
+          # Prepare deployment script
+          DEPLOY_SCRIPT="#!/bin/bash\n"
+          DEPLOY_SCRIPT+="set -e\n"
+          DEPLOY_SCRIPT+="cd $PROJECT_DIR\n"
+          DEPLOY_SCRIPT+="echo '=== Pulling latest changes ==='\n"
+          DEPLOY_SCRIPT+="git pull origin main\n"
+          DEPLOY_SCRIPT+="echo '=== Installing dependencies ==='\n"
+          DEPLOY_SCRIPT+="npm i\n\n"
+          
+          DEPLOY_SCRIPT+="# Initialize arrays for tracking build results\n"
+          DEPLOY_SCRIPT+="SUCCESSFUL_BUILDS=()\n"
+          DEPLOY_SCRIPT+="FAILED_BUILDS=()\n\n"
+          
+          DEPLOY_SCRIPT+="echo '=== Build Summary ==='\n"
+          
+          # Handle shared changes
+          if [[ "${{ needs.detect-changes.outputs.shared-tsx-changed }}" == "true" ]]; then
+            DEPLOY_SCRIPT+="echo 'Shared TSX files changed - attempting to build ALL portals'\n"
+            DEPLOY_SCRIPT+="for app in $ECOSYSTEM_DATA; do\n"
+            DEPLOY_SCRIPT+="  name=\$(echo \\\$app | jq -r '.name')\n"
+            DEPLOY_SCRIPT+="  cwd=\$(echo \\\$app | jq -r '.cwd')\n"
+            DEPLOY_SCRIPT+="  portal_name=\\\${name%-portal}\n"
+            DEPLOY_SCRIPT+="  echo \\\"Building \\\$portal_name...\\\"\n"
+            DEPLOY_SCRIPT+="  cd \\\$cwd\n"
+            DEPLOY_SCRIPT+="  if npm run build; then\n"
+            DEPLOY_SCRIPT+="    SUCCESSFUL_BUILDS+=(\\\"\\\$name\\\")\n"
+            DEPLOY_SCRIPT+="    echo \\\"✓ \\\$portal_name built successfully\\\"\n"
+            DEPLOY_SCRIPT+="  else\n"
+            DEPLOY_SCRIPT+="    FAILED_BUILDS+=(\\\"\\\$name\\\")\n"
+            DEPLOY_SCRIPT+="    echo \\\"✗ \\\$portal_name build failed\\\"\n"
+            DEPLOY_SCRIPT+="  fi\n"
+            DEPLOY_SCRIPT+="  cd - > /dev/null\n"
+            DEPLOY_SCRIPT+="done\n"
+            
+          elif [[ "${{ needs.detect-changes.outputs.shared-ts-changed }}" == "true" ]]; then
+            DEPLOY_SCRIPT+="echo 'Shared TS files changed - restarting ALL portals without build'\n"
+            DEPLOY_SCRIPT+="# pm2 reload all  # COMMENTED OUT FOR TESTING\n"
+            DEPLOY_SCRIPT+="SUCCESSFUL_BUILDS=('all')\n"
+            
+          elif [[ -n \"$CHANGED_PORTALS\" ]]; then
+            DEPLOY_SCRIPT+="echo 'Building changed portals: $CHANGED_PORTALS'\n"
+            DEPLOY_SCRIPT+="for portal in $CHANGED_PORTALS; do\n"
+            DEPLOY_SCRIPT+="  # Find the app in ecosystem.config.js\n"
+            DEPLOY_SCRIPT+="  app=\$(echo \\\"$ECOSYSTEM_DATA\\\" | jq -r '.[] | select(.cwd | contains(\\\"'\\\$portal'\\\"))')\n"
+            DEPLOY_SCRIPT+="  if [ -n \\\"\\\$app\\\" ]; then\n"
+            DEPLOY_SCRIPT+="    name=\$(echo \\\$app | jq -r '.name')\n"
+            DEPLOY_SCRIPT+="    cwd=\$(echo \\\$app | jq -r '.cwd')\n"
+            DEPLOY_SCRIPT+="    echo \\\"Building \\\$portal...\\\"\n"
+            DEPLOY_SCRIPT+="    cd \\\$cwd\n"
+            DEPLOY_SCRIPT+="    if npm run build; then\n"
+            DEPLOY_SCRIPT+="      SUCCESSFUL_BUILDS+=(\\\"\\\$name\\\")\n"
+            DEPLOY_SCRIPT+="      echo \\\"✓ \\\$portal built successfully\\\"\n"
+            DEPLOY_SCRIPT+="    else\n"
+            DEPLOY_SCRIPT+="      FAILED_BUILDS+=(\\\"\\\$name\\\")\n"
+            DEPLOY_SCRIPT+="      echo \\\"✗ \\\$portal build failed\\\"\n"
+            DEPLOY_SCRIPT+="    fi\n"
+            DEPLOY_SCRIPT+="    cd - > /dev/null\n"
+            DEPLOY_SCRIPT+="  fi\n"
+            DEPLOY_SCRIPT+="done\n"
+          fi
+          
+          # Restart successfully built portals - COMMENTED OUT FOR TESTING
+          DEPLOY_SCRIPT+="\necho '=== Restarting Successfully Built Portals (COMMENTED OUT FOR TESTING) ==='\n"
+          DEPLOY_SCRIPT+="if [ \\${#SUCCESSFUL_BUILDS[@]} -gt 0 ]; then\n"
+          DEPLOY_SCRIPT+="  for app_name in \\\"\\${SUCCESSFUL_BUILDS[@]}\\\"; do\n"
+          DEPLOY_SCRIPT+="    if [ \\\"\\\$app_name\\\" != \\\"all\\\" ]; then\n"
+          DEPLOY_SCRIPT+="      echo \\\"[TESTING] Would reload: \\\$app_name\\\"\n"
+          DEPLOY_SCRIPT+="      # pm2 reload \\\$app_name  # COMMENTED OUT FOR TESTING\n"
+          DEPLOY_SCRIPT+="    fi\n"
+          DEPLOY_SCRIPT+="  done\n"
+          DEPLOY_SCRIPT+="fi\n"
+          
+          # Build summary
+          DEPLOY_SCRIPT+="\necho '=== Deployment Summary ==='\n"
+          DEPLOY_SCRIPT+="echo 'Successfully built portals:'\n"
+          DEPLOY_SCRIPT+="printf '  - %s\\n' \\\"\\${SUCCESSFUL_BUILDS[@]}\\\"\n"
+          DEPLOY_SCRIPT+="echo 'Failed to build:'\n"
+          DEPLOY_SCRIPT+="printf '  - %s\\n' \\\"\\${FAILED_BUILDS[@]}\\\"\n"
+          DEPLOY_SCRIPT+="echo ''\n"
+          DEPLOY_SCRIPT+="echo '🚧 PM2 RELOAD COMMANDS ARE COMMENTED OUT FOR TESTING 🚧'\n"
+          DEPLOY_SCRIPT+="echo 'Portals would normally be restarted at this point'\n"
+          DEPLOY_SCRIPT+="\nif [ \\${#FAILED_BUILDS[@]} -eq 0 ]; then\n"
+          DEPLOY_SCRIPT+="  echo '🎉 All portals built successfully! (No restarts - testing mode)'\n"
+          DEPLOY_SCRIPT+="else\n"
+          DEPLOY_SCRIPT+="  echo '⚠️  Some portals failed to build'\n"
+          DEPLOY_SCRIPT+="fi\n"
+
+          # Execute deployment script on server
+          echo -e "$DEPLOY_SCRIPT" | sshpass -p "$SERVER_PASSWORD" ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST 'bash -s'
+
+      - name: Deployment status
+        run: echo "Deployment process completed! (Testing mode - no PM2 restarts)"
