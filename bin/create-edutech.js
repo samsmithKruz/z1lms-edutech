@@ -285,6 +285,7 @@ temp-*/`;
         fs.rmSync(workspaceName, { recursive: true, force: true });
       }
     } catch (cleanupError) {
+        console.error('⚠️  Error during cleanup:', cleanupError.message);
       // Ignore cleanup errors
     }
     
