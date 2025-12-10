@@ -65,7 +65,7 @@ async function createWorkspace(institution, firstPortal) {
         "lint": "turbo lint"
       },
       devDependencies: {
-        "turbo": "^latest"
+        "turbo": "^2.0.0"
       }
     };
     
@@ -193,7 +193,7 @@ npm run build:portal ./portals/<portal-name>
     
     // 10. Install turbo
     console.log('📦 Installing Turbo...');
-    execSync('npm install turbo --save-dev --silent', { stdio: 'pipe' });
+    execSync('npm install turbo --save-dev', { stdio: 'inherit' });
     
     // 11. Create .gitignore
     const gitignoreContent = `# Dependencies

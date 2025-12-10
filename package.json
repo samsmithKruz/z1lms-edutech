@@ -1,6 +1,6 @@
 {
   "name": "@z1lms/create-edutech",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "CLI tool to create and manage Edutech monorepo workspaces",
   "type": "commonjs",
   "keywords": [
