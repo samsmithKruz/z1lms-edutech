@@ -1,3 +1,12 @@
+## [1.0.5](https://github.com/samsmithKruz/z1lms-edutech/compare/v1.0.4...v1.0.5) (2025-12-10)
+
+
+### Bug Fixes
+
+* update turbo dependency version and change install command to inherit output ([28aafc7](https://github.com/samsmithKruz/z1lms-edutech/commit/28aafc7d3cc98a83432d2c8a22b78cbb2fbfc82f))
+
+
+
 ## [1.0.2](https://github.com/samsmithKruz/z1lms-edutech/compare/v1.0.1...v1.0.2) (2025-12-10)
 
 
