@@ -83,7 +83,7 @@ async function createWorkspace(institution, firstPortal) {
     const edutechConfig = {
       institution: institution,
       workspaceName: workspaceName,
-      registryUrl: "https://raw.githubusercontent.com/z1lms/edutech-portal-registry/main/registry.json",
+      registryUrl: "https://raw.githubusercontent.com/z1technologieslive/edutech-portal-registry/main/registry.json",
       createdAt: new Date().toISOString(),
       version: "1.0.0"
     };
